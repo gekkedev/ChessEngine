@@ -74,6 +74,10 @@ export class ChessEngine {
 
     const target = this.getPiece(toX, toY);
 
+    //TODO: move this into isValidMove()
+    // capturing a king is not a legal move
+    if (target && target.type === 'king') return false;
+
     // simulate move to ensure it doesn't leave king in check
     this.board[toY][toX] = piece;
     this.board[fromY][fromX] = null;
@@ -164,6 +168,9 @@ export class ChessEngine {
   }
 
   isValidMove(piece, fromX, fromY, toX, toY) {
+    // ensure that the new coordinates are still on the board
+    if (![fromX, fromY, toX, toY].every(n => n >= 0 && n < 8)) return false;
+
     const dx = toX - fromX;
     const dy = toY - fromY;
     const target = this.getPiece(toX, toY);
