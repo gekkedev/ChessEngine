@@ -47,6 +47,10 @@ export class ChessEngine {
     return this._locale().colors[color] || color;
   }
 
+  getTurnLabel() {
+    return this._locale().turn || '';
+  }
+
   addPlugin(plugin) {
     this.plugins.push(plugin);
   }
