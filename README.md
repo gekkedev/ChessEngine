@@ -18,6 +18,13 @@ standard chess rules implemented in the engine. Plugins can hook into the
 `beforeMove` and `afterMove` events of the `ChessEngine` class to introduce new
 rules or features.
 
+## GitHub Pages
+
+The contents of the `web/` directory are automatically deployed to
+[GitHub Pages](https://pages.github.com/). Any push to the `main` branch will
+trigger the deployment workflow and publish the latest demo at
+`https://gekkedev.github.io/ChessEngine/`.
+
 ## Extending
 
 Create an object with `beforeMove(engine, piece, move)` or `afterMove(engine,
