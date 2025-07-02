@@ -129,3 +129,21 @@ test('king cannot move into check', () => {
   // king tries to step into rook's line of fire
   assert.equal(e.move(4,0,4,1), false);
 });
+
+test('cannot capture the king', () => {
+  const e = createEngine();
+  // clear board except kings and a white rook
+  e.board = Array.from({ length: 8 }, () => Array(8).fill(null));
+  e.board[0][4] = { type: 'king', color: 'white' };
+  e.board[7][0] = { type: 'king', color: 'black' };
+  e.board[0][0] = { type: 'rook', color: 'white' };
+  e.turn = 'white';
+  // attempt to capture the black king
+  assert.equal(e.move(0,0,0,7), false);
+});
+
+test('move outside board is rejected', () => {
+  const e = createEngine();
+  assert.equal(e.move(0,1,0,8), false);
+  assert.equal(e.getPiece(0,1).type, 'pawn');
+});

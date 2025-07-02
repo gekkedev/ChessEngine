@@ -60,6 +60,9 @@ export class ChessEngine {
   }
 
   move(fromX, fromY, toX, toY) {
+    // ensure coordinates stay on the board
+    if (![fromX, fromY, toX, toY].every(n => n >= 0 && n < 8)) return false;
+
     const piece = this.getPiece(fromX, fromY);
     if (!piece) return false;
     if (piece.color !== this.turn) return false;
@@ -73,6 +76,8 @@ export class ChessEngine {
     if (!this.isValidMove(piece, fromX, fromY, toX, toY)) return false;
 
     const target = this.getPiece(toX, toY);
+    // capturing a king is not a legal move
+    if (target && target.type === 'king') return false;
 
     // simulate move to ensure it doesn't leave king in check
     this.board[toY][toX] = piece;
