@@ -1,6 +1,8 @@
 {
   "name": "chessengine",
   "version": "0.1.0",
+  "author": "gekkedev",
+  "license": "MIT",
   "main": "index.js",
   "type": "module",
   "description": "Base Chess Engine with plugin support"
