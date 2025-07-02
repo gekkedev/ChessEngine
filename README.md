@@ -20,10 +20,11 @@ rules or features.
 
 ## GitHub Pages
 
-The contents of the `web/` directory are automatically deployed to
-[GitHub Pages](https://pages.github.com/). Any push to the `main` branch will
-trigger the deployment workflow and publish the latest demo at
-`https://gekkedev.github.io/ChessEngine/`.
+The entire repository is automatically deployed to
+[GitHub Pages](https://pages.github.com/). Any push to the `main` branch
+publishes the demo at `https://gekkedev.github.io/ChessEngine/`. The root
+`index.html` simply redirects to `web/index.html`, which loads the engine from
+the neighbouring `engine/` directory.
 
 ## Extending
 
