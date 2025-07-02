@@ -1,6 +1,6 @@
 # ChessEngine
 
-[**Play the demo**](web/index.html)
+[**Play the demo**](web)
 
 This repository provides a small JavaScript chess engine that is intended to be
 extended through a simple plugin system. A basic web interface is included in
