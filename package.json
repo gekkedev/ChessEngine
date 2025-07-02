@@ -1,6 +1,7 @@
 {
   "name": "chessengine-project",
   "private": true,
+  "author": "gekkedev",
   "type": "module",
   "scripts": {
     "test": "node --test"
