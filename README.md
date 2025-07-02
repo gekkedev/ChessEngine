@@ -33,6 +33,15 @@ are provided in `engine/locales.js`. Languages include English, German, French,
 Spanish, Italian, Ukrainian and Traditional Chinese. The web interface selects a
 language based on the browser settings.
 
+## Testing
+
+The project uses Node.js's built-in test runner. Ensure Node.js 18 or newer is
+installed and run:
+
+```bash
+npm test
+```
+
 ## License
 
 See [LICENSE](LICENSE) for license information.
