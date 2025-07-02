@@ -75,6 +75,7 @@ export class ChessEngine {
     this.board[fromY][fromX] = null;
     const inCheck = this.isCheck(piece.color);
     if (inCheck) {
+      // revert the move as it is against the rules
       this.board[fromY][fromX] = piece;
       this.board[toY][toX] = target;
       return false;
