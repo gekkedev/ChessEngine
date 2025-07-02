@@ -1,5 +1,7 @@
 # ChessEngine
 
+[**Play the demo**](web/index.html)
+
 This repository provides a small JavaScript chess engine that is intended to be
 extended through a simple plugin system. A basic web interface is included in
 the `web/` directory as an example of how the engine can be consumed.
@@ -22,9 +24,9 @@ rules or features.
 
 The entire repository is automatically deployed to
 [GitHub Pages](https://pages.github.com/). Any push to the `main` branch
-publishes the demo at `https://gekkedev.github.io/ChessEngine/`. The root
-`index.html` simply redirects to `web/index.html`, which loads the engine from
-the neighbouring `engine/` directory.
+publishes the demo at `https://gekkedev.github.io/ChessEngine/`. The entry
+point is the `web/` directory, which loads the engine from the neighbouring
+`engine/` folder.
 
 ## Extending
 
