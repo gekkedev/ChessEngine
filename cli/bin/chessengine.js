@@ -4,9 +4,11 @@ import readline from 'node:readline/promises';
 import process from 'node:process';
 
 function posToCoord(pos) {
+  // allow both uppercase and lowercase coordinates
+  const p = pos.toLowerCase();
   const files = 'abcdefgh';
-  const x = files.indexOf(pos[0]);
-  const y = Number(pos[1]) - 1;
+  const x = files.indexOf(p[0]);
+  const y = Number(p[1]) - 1;
   return [x, y];
 }
 

@@ -23,7 +23,8 @@ rules or features.
 ### CLI
 
 For quick testing on the command line a simple CLI is provided in `cli/`.
-Install dependencies and run moves directly without touching JavaScript:
+Install dependencies and run moves directly without touching JavaScript. Moves can
+be written in lowercase or uppercase:
 
 ```bash
 node cli/bin/chessengine.js --moves=e2e4,e7e5
