@@ -58,3 +58,62 @@ test('plugin can block moves', () => {
   e.addPlugin(blocker);
   assert.equal(e.move(0,1,0,3), false);
 });
+
+test('reset restores initial state', () => {
+  const e = createEngine();
+  e.move(0,1,0,3);
+  e.move(1,6,1,4);
+  e.move(0,3,1,4); // capture
+  assert.equal(e.getCaptured().length, 1);
+  e.reset();
+  assert.equal(e.turn, 'white');
+  assert.equal(e.getCaptured().length, 0);
+  assert.equal(e.getPiece(0,1).type, 'pawn');
+  assert.equal(e.getPiece(1,6).type, 'pawn');
+});
+
+test('afterMove plugin is called', () => {
+  const e = createEngine();
+  let called = false;
+  e.addPlugin({ afterMove() { called = true; } });
+  e.move(0,1,0,3);
+  assert.equal(called, true);
+});
+
+test('localization translates names', () => {
+  const e = createEngine();
+  e.setLanguage('de');
+  assert.equal(e.getPieceName('king'), 'K\u00f6nig');
+  assert.equal(e.getEventName('check'), 'Schach');
+});
+
+test('rook movement and blocking', () => {
+  const e = createEngine();
+  assert.equal(e.move(0,0,0,2), false); // blocked by pawn
+  e.board[1][0] = null; // clear path
+  assert.equal(e.move(0,0,0,2), true);
+  e.turn = 'white';
+  assert.equal(e.move(0,2,1,3), false); // diagonal not allowed
+});
+
+test('bishop diagonal movement', () => {
+  const e = createEngine();
+  assert.equal(e.move(2,0,5,3), false); // blocked
+  e.board[1][3] = null;
+  e.board[2][4] = null;
+  assert.equal(e.move(2,0,5,3), true);
+  e.turn = 'white';
+  assert.equal(e.move(5,3,5,4), false); // vertical not allowed
+});
+
+test('knight can jump over pieces', () => {
+  const e = createEngine();
+  assert.equal(e.move(1,0,2,2), true);
+  assert.equal(e.getPiece(2,2).type, 'knight');
+});
+
+test('pawn cannot capture forward', () => {
+  const e = createEngine();
+  e.board[2][0] = { type: 'pawn', color: 'black' };
+  assert.equal(e.move(0,1,0,2), false);
+});
