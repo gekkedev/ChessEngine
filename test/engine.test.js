@@ -148,3 +148,9 @@ test('move outside board is rejected', () => {
   assert.equal(e.move(0,1,-1,0), false); // different direction
   assert.equal(e.getPiece(0,1).type, 'pawn'); // ensure a pawn exists
 });
+
+test('stationary move is not allowed', () => {
+  const e = createEngine();
+  assert.equal(e.move(0,0,0,0), false);
+  assert.equal(e.turn, 'white');
+});
