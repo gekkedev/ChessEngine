@@ -26,6 +26,13 @@ piece, move)` methods and register it using `engine.addPlugin(plugin)`. Returnin
 allows rules such as castling, en passant or custom pieces to be added without
 modifying the core engine.
 
+## Localization
+
+Translations for piece names and basic events such as "check" and "checkmate"
+are provided in `engine/locales.js`. Languages include English, German, French,
+Spanish, Italian, Ukrainian and Traditional Chinese. The web interface selects a
+language based on the browser settings.
+
 ## License
 
 See [LICENSE](LICENSE) for license information.

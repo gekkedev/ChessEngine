@@ -1,9 +1,19 @@
 import { ChessEngine } from '../engine/index.js';
 import { LoggerPlugin } from '../engine/plugins.js';
+import { LOCALES } from '../engine/locales.js';
 
 const boardEl = document.getElementById('board');
+const turnEl = document.getElementById('turn');
+const infoEl = document.getElementById('info');
+const statusEl = document.getElementById('status');
+const capWhiteEl = document.getElementById('captured-white');
+const capBlackEl = document.getElementById('captured-black');
+const resetBtn = document.getElementById('reset');
+
 const engine = new ChessEngine();
 engine.addPlugin(new LoggerPlugin());
+const lang = (navigator.language || 'en').split('-')[0];
+if (LOCALES[lang]) engine.setLanguage(lang);
 
 const pieceSymbols = {
   pawn:   { white: '♙', black: '♟' },
@@ -18,6 +28,10 @@ let selected = null;
 
 function render() {
   boardEl.innerHTML = '';
+  turnEl.textContent = engine.getColorName(engine.turn);
+  const event = engine.getLastEvent();
+  statusEl.textContent = event ? engine.getEventName(event) : '';
+  updateCaptured();
   for (let y = 7; y >= 0; y--) {
     for (let x = 0; x < 8; x++) {
       const square = document.createElement('div');
@@ -29,6 +43,14 @@ function render() {
         square.textContent = pieceSymbols[piece.type][piece.color];
       }
       square.addEventListener('click', onSquareClick);
+      square.addEventListener('mouseover', () => {
+        const p = engine.getPiece(x, y);
+        const coord = String.fromCharCode(97 + x) + (y + 1);
+        infoEl.textContent = p ? engine.getPieceName(p.type) + ' ' + coord : coord;
+      });
+      square.addEventListener('mouseout', () => {
+        infoEl.textContent = '';
+      });
       boardEl.appendChild(square);
     }
   }
@@ -51,5 +73,16 @@ function onSquareClick(e) {
     }
   }
 }
+
+function updateCaptured() {
+  const caps = engine.getCaptured();
+  capWhiteEl.textContent = caps.filter(p => p.color === 'white').map(p => pieceSymbols[p.type][p.color]).join(' ');
+  capBlackEl.textContent = caps.filter(p => p.color === 'black').map(p => pieceSymbols[p.type][p.color]).join(' ');
+}
+
+resetBtn.addEventListener('click', () => {
+  engine.reset();
+  render();
+});
 
 render();
