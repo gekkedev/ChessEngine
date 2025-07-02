@@ -45,7 +45,7 @@ function render() {
       square.addEventListener('click', onSquareClick);
       square.addEventListener('mouseover', () => {
         const p = engine.getPiece(x, y);
-        const coord = String.fromCharCode(97 + x) + (y + 1);
+        const coord = String.fromCharCode(97 + x).toLocaleUpperCase() + (y + 1);
         infoEl.textContent = p ? engine.getPieceName(p.type) + ' ' + coord : coord;
       });
       square.addEventListener('mouseout', () => {
