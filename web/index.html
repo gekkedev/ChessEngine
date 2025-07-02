@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ChessEngine Demo</title>
+  <style>
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-template-rows: repeat(8, 50px);
+      width: 400px;
+    }
+    .square {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      user-select: none;
+      transition: transform 0.1s;
+    }
+    .light { background: #eee; }
+    .dark { background: #555; color: white; }
+    .square:hover { transform: scale(1.1); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="turn"></div>
+  <div id="status"></div>
+  <div id="info"></div>
+  <div id="board"></div>
+  <div>
+    <strong>Captured White:</strong> <span id="captured-white"></span>
+  </div>
+  <div>
+    <strong>Captured Black:</strong> <span id="captured-black"></span>
+  </div>
+  <button id="reset">Reset</button>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
