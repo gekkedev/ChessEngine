@@ -28,7 +28,7 @@ let selected = null;
 
 function render() {
   boardEl.innerHTML = '';
-  turnEl.textContent = engine.getColorName(engine.turn);
+  turnEl.textContent = engine.getTurnLabel() + ': ' + engine.getColorName(engine.turn);
   const event = engine.getLastEvent();
   statusEl.textContent = event ? engine.getEventName(event) : '';
   updateCaptured();
@@ -41,6 +41,9 @@ function render() {
       const piece = engine.getPiece(x, y);
       if (piece) {
         square.textContent = pieceSymbols[piece.type][piece.color];
+      }
+      if (selected && selected.x === x && selected.y === y) {
+        square.classList.add('selected');
       }
       square.addEventListener('click', onSquareClick);
       square.addEventListener('mouseover', () => {
@@ -66,10 +69,12 @@ function onSquareClick(e) {
       return;
     }
     selected = null;
+    render();
   } else {
     const piece = engine.getPiece(x, y);
     if (piece && piece.color === engine.turn) {
       selected = { x, y };
+      render();
     }
   }
 }
