@@ -27,7 +27,7 @@ Install dependencies and run moves directly without touching JavaScript. Moves c
 be written in lowercase or uppercase:
 
 ```bash
-node cli/bin/chessengine.js --moves=e2e4,e7e5
+node cli/bin/chessengine.js --moves=e2e4,E7E5
 ```
 
 ## GitHub Pages
