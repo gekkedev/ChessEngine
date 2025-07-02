@@ -144,6 +144,7 @@ test('cannot capture the king', () => {
 
 test('move outside board is rejected', () => {
   const e = createEngine();
-  assert.equal(e.move(0,1,0,8), false);
-  assert.equal(e.getPiece(0,1).type, 'pawn');
+  assert.equal(e.move(0,1,0,-1), false); // attempt an out of bounds move
+  assert.equal(e.move(0,1,-1,0), false); // different direction
+  assert.equal(e.getPiece(0,1).type, 'pawn'); // ensure a pawn exists
 });
