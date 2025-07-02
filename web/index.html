@@ -23,18 +23,26 @@
     .light { background: #eee; }
     .dark { background: #555; color: white; }
     .square:hover { transform: scale(1.1); cursor: pointer; }
+    .status-bar {
+      display: flex;
+      width: 100%;
+      text-align: center;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
-  <div id="turn"></div>
-  <div id="status"></div>
-  <div id="info"></div>
+  <div class="status-bar">
+    <span id="info">Left</span>
+    <span id="status">Center</span>
+    <span id="turn">Right</span>
+  </div>
   <div id="board"></div>
   <div>
-    <strong>Captured White:</strong> <span id="captured-white"></span>
+    <strong>Captured by white:</strong> <span id="captured-white"></span>
   </div>
   <div>
-    <strong>Captured Black:</strong> <span id="captured-black"></span>
+    <strong>Captured by black:</strong> <span id="captured-black"></span>
   </div>
   <button id="reset">Reset</button>
   <script type="module" src="app.js"></script>
