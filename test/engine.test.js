@@ -117,3 +117,15 @@ test('pawn cannot capture forward', () => {
   e.board[2][0] = { type: 'pawn', color: 'black' };
   assert.equal(e.move(0,1,0,2), false);
 });
+
+test('king cannot move into check', () => {
+  const e = createEngine();
+  // clear the board
+  e.board = Array.from({ length: 8 }, () => Array(8).fill(null));
+  // place kings and an attacking rook
+  e.board[0][4] = { type: 'king', color: 'white' };
+  e.board[7][4] = { type: 'rook', color: 'black' };
+  e.turn = 'white';
+  // king tries to step into rook's line of fire
+  assert.equal(e.move(4,0,4,1), false);
+});

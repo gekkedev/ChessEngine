@@ -69,10 +69,19 @@ export class ChessEngine {
     if (!this.isValidMove(piece, fromX, fromY, toX, toY)) return false;
 
     const target = this.getPiece(toX, toY);
-    if (target) this.captured.push(target);
 
+    // simulate move to ensure it doesn't leave king in check
     this.board[toY][toX] = piece;
     this.board[fromY][fromX] = null;
+    const inCheck = this.isCheck(piece.color);
+    if (inCheck) {
+      this.board[fromY][fromX] = piece;
+      this.board[toY][toX] = target;
+      return false;
+    }
+
+    if (target) this.captured.push(target);
+
     this.turn = this.turn === 'white' ? 'black' : 'white';
     this._checkEvents();
 
