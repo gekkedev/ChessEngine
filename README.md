@@ -27,6 +27,7 @@ The entire repository is automatically deployed to
 publishes the demo at `https://gekkedev.github.io/ChessEngine/`. The entry
 point is the `web/` directory, which loads the engine from the neighbouring
 `engine/` folder.
+All automated tests must pass before a new version is deployed.
 
 ## Extending
 
