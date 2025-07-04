@@ -1,0 +1,11 @@
+{
+  "name": "chessengine-cli",
+  "version": "0.1.0",
+  "bin": {
+    "chessengine": "index.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "chessengine": "file:../engine"
+  }
+}

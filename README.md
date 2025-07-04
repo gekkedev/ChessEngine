@@ -20,6 +20,20 @@ standard chess rules implemented in the engine. Plugins can hook into the
 `beforeMove` and `afterMove` events of the `ChessEngine` class to introduce new
 rules or features.
 
+### CLI
+
+For quick testing on the command line a simple CLI is provided in `cli/`.
+Install dependencies and run moves directly or interactively without touching JavaScript. Moves can
+be written in lowercase or uppercase:
+
+```bash
+node cli/index.js --moves=e2e4,e7e5
+node cli/index.js # start interactive mode
+```
+
+In interactive mode you can type `help` to show available commands and `board` to
+display the full board at any time.
+
 ## GitHub Pages
 
 The entire repository is automatically deployed to
