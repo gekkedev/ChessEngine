@@ -51,6 +51,19 @@ export class ChessEngine {
     return this._locale().turn || '';
   }
 
+  getCapturedByWhiteLabel() {
+    // rely on default English translations in LOCALES
+    return this._locale().capturedWhite;
+  }
+
+  getCapturedByBlackLabel() {
+    return this._locale().capturedBlack;
+  }
+
+  getResetLabel() {
+    return this._locale().reset;
+  }
+
   addPlugin(plugin) {
     this.plugins.push(plugin);
   }
