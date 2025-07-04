@@ -152,5 +152,5 @@ test('move outside board is rejected', () => {
 test('stationary move is not allowed', () => {
   const e = createEngine();
   assert.equal(e.move(0,0,0,0), false);
-  assert.equal(e.turn, 'white');
+  assert.equal(e.turn, 'white'); // is it still white's turn?
 });
