@@ -31,7 +31,7 @@ function runCliInteractive(commands) {
   });
 }
 
-test('runs moves from command line', async () => {
+test('runs uppercase moves from command line', async () => {
   const { stdout } = await runCli(['--moves=E2E4,E7E5']);
   const lines = stdout.trim().split(/\n/);
   assert.equal(lines[0], 'ok');
