@@ -87,6 +87,13 @@ test('localization translates names', () => {
   assert.equal(e.getEventName('check'), 'Schach');
 });
 
+test('localization translates labels', () => {
+  const e = createEngine();
+  e.setLanguage('es');
+  assert.equal(e.getCapturedByWhiteLabel(), 'Capturado por blancas:');
+  assert.equal(e.getResetLabel(), 'Reiniciar');
+});
+
 test('rook movement and blocking', () => {
   const e = createEngine();
   assert.equal(e.move(0,0,0,2), false); // blocked by pawn
