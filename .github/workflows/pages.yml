@@ -25,7 +25,7 @@ jobs:
           node-version: 18
       - run: npm test
         # Ensure the build only proceeds if tests succeed
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: '.'

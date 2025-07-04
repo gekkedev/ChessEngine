@@ -8,12 +8,17 @@ const infoEl = document.getElementById('info');
 const statusEl = document.getElementById('status');
 const capWhiteEl = document.getElementById('captured-white');
 const capBlackEl = document.getElementById('captured-black');
+const capWhiteLabelEl = document.getElementById('captured-white-label');
+const capBlackLabelEl = document.getElementById('captured-black-label');
 const resetBtn = document.getElementById('reset');
 
 const engine = new ChessEngine();
 engine.addPlugin(new LoggerPlugin());
 const lang = (navigator.language || 'en').split('-')[0];
 if (LOCALES[lang]) engine.setLanguage(lang);
+capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
+capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
+resetBtn.textContent = engine.getResetLabel();
 
 const pieceSymbols = {
   pawn:   { white: '♙', black: '♟' },
