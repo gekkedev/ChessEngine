@@ -27,7 +27,7 @@ Install dependencies and run moves directly or interactively without touching Ja
 be written in lowercase or uppercase:
 
 ```bash
-node cli/index.js --moves=e2e4,e7e5
+node cli/index.js --moves=e2e4,E7E5
 node cli/index.js # start interactive mode
 ```
 
