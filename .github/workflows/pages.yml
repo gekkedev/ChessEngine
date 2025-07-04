@@ -1,8 +1,9 @@
 name: GitHub Pages
 
 on:
+  # Run tests for every branch and pull request
   push:
-    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -25,10 +26,14 @@ jobs:
       - run: npm test
         # Ensure the build only proceeds if tests succeed
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: '.'
+        # Only generate a deployment artifact when pushing to main
 
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Deploy only when pushing to the main branch
     needs: build
     runs-on: ubuntu-latest
     environment:
