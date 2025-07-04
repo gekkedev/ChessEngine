@@ -171,7 +171,7 @@ export class ChessEngine {
     // ensure that the new coordinates are still on the board
     if (![fromX, fromY, toX, toY].every(n => n >= 0 && n < 8)) return false;
 
-    // moving to the same square would effectively pass a turn
+    // moving to the same square would effectively skip a turn
     if (fromX === toX && fromY === toY) return false;
 
     const dx = toX - fromX;
