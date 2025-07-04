@@ -24,7 +24,7 @@ jobs:
           node-version: 18
       - run: npm test
         # Ensure the build only proceeds if tests succeed
-      - uses: actions/upload-pages-artifact@v2
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
