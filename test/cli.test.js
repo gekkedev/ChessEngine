@@ -54,3 +54,19 @@ test('board command prints initial board', async () => {
   const { stdout } = await runCliInteractive(['board', 'exit']);
   assert.ok(stdout.includes('r n b q k b n r 8'));
 });
+
+test('language parameter localizes output', async () => {
+  const { stdout } = await runCli(['--lang=de', '--moves=f2f3,e7e5,g2g4,d8h4']);
+  const lines = stdout.trim().split(/\n/);
+  assert.equal(lines.at(-1), 'Schachmatt');
+});
+
+test('interactive lang command changes prompt language', async () => {
+  const { stdout } = await runCliInteractive(['lang de']);
+  assert.ok(stdout.includes('Am Zug'));
+});
+
+test('interactive reset command prints label', async () => {
+  const { stdout } = await runCliInteractive(['reset']);
+  assert.ok(stdout.includes('Reset'));
+});

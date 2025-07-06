@@ -14,13 +14,15 @@ function posToCoord(pos) {
 }
 
 function usage() {
-  console.log('Usage: chessengine [--moves=a2a4,b7b5]');
+  console.log('Usage: chessengine [--moves=a2a4,b7b5] [--lang=de]');
 }
 
 const movesArg = process.argv.find(a => a.startsWith('--moves='));
+const langArg = process.argv.find(a => a.startsWith('--lang='));
 if (movesArg) {
   const moves = movesArg.slice('--moves='.length).split(',');
   const engine = new ChessEngine();
+  if (langArg) engine.setLanguage(langArg.slice('--lang='.length));
   for (const m of moves) {
     const [from, to] = [m.slice(0,2), m.slice(2,4)];
     const coords = [...posToCoord(from), ...posToCoord(to)];
@@ -37,6 +39,7 @@ if (!movesArg) {
   // Start interactive REPL when no moves are provided.
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const engine = new ChessEngine();
+  if (langArg) engine.setLanguage(langArg.slice('--lang='.length));
   console.log('Type moves like e2e4. Type "help" for commands.');
 
   // Convert internal piece representation to a single character.
@@ -67,11 +70,21 @@ if (!movesArg) {
     const answer = (await rl.question(prompt)).trim();
     if (answer === 'exit') { rl.close(); return; }
     if (answer === 'help') {
-      console.log('Commands: help, board, exit, <move>');
+      console.log('Commands: help, board, lang <code>, reset, exit, <move>');
       return loop();
     }
     if (answer === 'board') {
       showBoard();
+      return loop();
+    }
+    if (answer.startsWith('lang ')) {
+      const code = answer.split(/\s+/)[1];
+      if (code) engine.setLanguage(code);
+      return loop();
+    }
+    if (answer === 'reset') {
+      engine.reset();
+      console.log(engine.getResetLabel());
       return loop();
     }
     if (answer.length < 4) { console.log('Invalid format'); return loop(); }
