@@ -61,17 +61,30 @@ if (!movesArg) {
     console.log(files.split('').join(' '));
   }
 
+  function showCaptured() {
+    const caps = engine.getCaptured();
+    // pieces captured by white are black pieces
+    const byWhite = caps.filter(p => p.color === 'black').map(pieceChar).join(' ');
+    const byBlack = caps.filter(p => p.color === 'white').map(pieceChar).join(' ');
+    console.log(engine.getCapturedByWhiteLabel(), byWhite || '-');
+    console.log(engine.getCapturedByBlackLabel(), byBlack || '-');
+  }
+
   async function loop() {
     // Show the turn label with color name in parentheses
     const prompt = `${engine.getTurnLabel()} (${engine.getColorName(engine.turn)})> `;
     const answer = (await rl.question(prompt)).trim();
     if (answer === 'exit') { rl.close(); return; }
     if (answer === 'help') {
-      console.log('Commands: help, board, exit, <move>');
+      console.log('Commands: help, board, captured, exit, <move>');
       return loop();
     }
     if (answer === 'board') {
       showBoard();
+      return loop();
+    }
+    if (answer === 'captured') {
+      showCaptured();
       return loop();
     }
     if (answer.length < 4) { console.log('Invalid format'); return loop(); }

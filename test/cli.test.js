@@ -24,10 +24,12 @@ function runCliInteractive(commands) {
     child.stdout.on('data', data => { stdout += data; });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
+    let delay = 0;
     for (const cmd of commands) {
-      child.stdin.write(cmd + '\n');
+      setTimeout(() => child.stdin.write(cmd + '\n'), delay);
+      delay += 50; // small delay to allow readline processing
     }
-    child.stdin.end();
+    setTimeout(() => child.stdin.end(), delay);
   });
 }
 
@@ -53,4 +55,10 @@ test('interactive help output', async () => {
 test('board command prints initial board', async () => {
   const { stdout } = await runCliInteractive(['board', 'exit']);
   assert.ok(stdout.includes('r n b q k b n r 8'));
+});
+
+test('captured command shows captured pieces', async () => {
+  const cmds = ['e2e4', 'd7d5', 'e4d5', 'captured', 'exit'];
+  const { stdout } = await runCliInteractive(cmds);
+  assert.ok(stdout.includes('Captured by white: p'));
 });
