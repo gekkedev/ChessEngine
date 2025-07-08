@@ -24,12 +24,10 @@ function runCliInteractive(commands) {
     child.stdout.on('data', data => { stdout += data; });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
-    let delay = 0;
     for (const cmd of commands) {
-      setTimeout(() => child.stdin.write(cmd + '\n'), delay);
-      delay += 50; // small delay to allow readline processing
+      child.stdin.write(cmd + '\n');
     }
-    setTimeout(() => child.stdin.end(), delay);
+    child.stdin.end();
   });
 }
 
