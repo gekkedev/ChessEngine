@@ -54,3 +54,9 @@ test('board command prints initial board', async () => {
   const { stdout } = await runCliInteractive(['board', 'exit']);
   assert.ok(stdout.includes('r n b q k b n r 8'));
 });
+
+test('captured command shows captured pieces', async () => {
+  const cmds = ['e2e4', 'd7d5', 'e4d5', 'captured', 'exit'];
+  const { stdout } = await runCliInteractive(cmds);
+  assert.ok(stdout.includes('Captured by white: p'));
+});
