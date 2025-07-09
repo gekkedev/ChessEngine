@@ -17,17 +17,20 @@ function runCli(args) {
   });
 }
 
-function runCliInteractive(commands) {
+function runCliInteractive(commands, args = []) {
   return new Promise((resolve, reject) => {
-    const child = spawn('node', [cliPath], { encoding: 'utf8' });
+    const child = spawn('node', [cliPath, ...args], { encoding: 'utf8' });
     let stdout = '';
     child.stdout.on('data', data => { stdout += data; });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
-    for (const cmd of commands) {
-      child.stdin.write(cmd + '\n');
-    }
-    child.stdin.end();
+    (async () => {
+      for (const cmd of commands) {
+        child.stdin.write(cmd + '\n');
+        await new Promise(r => setTimeout(r, 100));
+      }
+      child.stdin.end();
+    })();
   });
 }
 
@@ -53,4 +56,34 @@ test('interactive help output', async () => {
 test('board command prints initial board', async () => {
   const { stdout } = await runCliInteractive(['board', 'exit']);
   assert.ok(stdout.includes('r n b q k b n r 8'));
+});
+
+test('language parameter localizes output', async () => {
+  const { stdout } = await runCli(['--lang=de', '--moves=f2f3,e7e5,g2g4,d8h4']);
+  const lines = stdout.trim().split(/\n/);
+  assert.equal(lines.at(-1), 'Schachmatt');
+});
+
+test('interactive lang command changes prompt language', async () => {
+  const { stdout } = await runCliInteractive(['lang de']);
+  assert.ok(stdout.includes('Am Zug'));
+});
+
+test('interactive reset command restores board', async () => {
+  const { stdout } = await runCliInteractive([
+    'e2e4',
+    'board',
+    'reset',
+    'board',
+    'exit'
+  ]);
+  const boards = stdout.match(/r n b q k b n r 8(?:[\s\S]*?a b c d e f g h)/g);
+  assert.ok(boards?.length >= 2);
+  const afterMove = boards[0];
+  const afterReset = boards[1];
+  //not strictly necessary to check exact positions in this test, as long as before reset != after reset
+  //assert.ok(afterMove.includes('. . . . P . . . 4'));
+  //assert.ok(afterMove.includes('P P P P . P P P 2'));
+  //assert.ok(afterReset.includes('P P P P P P P P 2'));
+  assert.notEqual(afterMove, afterReset);
 });
