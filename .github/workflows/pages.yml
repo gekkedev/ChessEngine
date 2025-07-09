@@ -29,7 +29,7 @@ jobs:
         # Jekyll builds from index.md by default
         run: cp README.md index.md
       - uses: actions/configure-pages@v5
-        # Prepare Pages to build the site using Jekyll
+      - uses: actions/jekyll-build-pages@v1
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
