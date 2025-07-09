@@ -13,6 +13,8 @@ const capBlackLabelEl = document.getElementById('captured-black-label');
 const resetBtn = document.getElementById('reset');
 
 const engine = new ChessEngine();
+// expose engine globally so other modules like the console can reuse it
+window.engine = engine;
 engine.addPlugin(new LoggerPlugin());
 const lang = (navigator.language || 'en').split('-')[0];
 if (LOCALES[lang]) engine.setLanguage(lang);
@@ -64,18 +66,25 @@ function render() {
   }
 }
 
+// hook the rendering method to the engine to be able to visualize events triggered by the console
+engine.onUpdate = render;
+
 function onSquareClick(e) {
   const x = parseInt(e.currentTarget.dataset.x, 10);
   const y = parseInt(e.currentTarget.dataset.y, 10);
   if (selected) {
-    if (engine.move(selected.x, selected.y, x, y)) {
-      selected = null;
-      render();
+    /** temporary var while the official selection already gets reset */
+    const selectedPiece = selected
+    // whether the move will be accepted or rejected, we need to clear the selection:
+    selected = null;
+    if (engine.move(selectedPiece.x, selectedPiece.y, x, y)) {
+      //happens automatically via engine.onUpdate when the move is accepted
+      // render();
       return;
     }
-    selected = null;
+    // move was rejected by the engine, so update the board to visualize the cleared selection
     render();
-  } else {
+  } else { // highlight the selected piece
     const piece = engine.getPiece(x, y);
     if (piece && piece.color === engine.turn) {
       selected = { x, y };
@@ -92,7 +101,7 @@ function updateCaptured() {
 
 resetBtn.addEventListener('click', () => {
   engine.reset();
-  render();
+  // render(); //happens automatically via engine.onUpdate
 });
 
 render();
