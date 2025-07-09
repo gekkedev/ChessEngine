@@ -18,16 +18,13 @@ const engine = new ChessEngine();
 window.engine = engine;
 engine.addPlugin(new LoggerPlugin());
 
-function populateLanguageOptions() {
-  for (const code of Object.keys(LOCALES)) {
-    const option = document.createElement('option');
-    option.value = code;
-    option.textContent = code;
-    langSelectEl.appendChild(option);
-  }
+// populate language select options
+for (const code of Object.keys(LOCALES)) {
+  const option = document.createElement('option');
+  option.value = code;
+  option.textContent = code;
+  langSelectEl.appendChild(option);
 }
-
-populateLanguageOptions();
 
 const lang = (navigator.language || 'en').split('-')[0];
 if (LOCALES[lang]) {
@@ -38,10 +35,6 @@ if (LOCALES[lang]) {
 langSelectEl.addEventListener('change', () => {
   engine.setLanguage(langSelectEl.value);
 });
-
-capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
-capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
-resetBtn.textContent = engine.getResetLabel();
 
 const pieceSymbols = {
   pawn:   { white: '♙', black: '♟' },
