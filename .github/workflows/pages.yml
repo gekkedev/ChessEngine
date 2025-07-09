@@ -19,16 +19,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 18
       - run: npm test
         # Ensure the build only proceeds if tests succeed
+      - name: Copy README.md to index.md
+        # Jekyll builds from index.md by default
+        run: cp README.md index.md
+      - uses: actions/configure-pages@v5
+        # Prepare environment variables for the build
+      - uses: actions/jekyll-build-pages@v1
+        # Build the site to the _site directory
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
-          path: '.'
+          path: ./_site
         # Only generate a deployment artifact when pushing to main
 
   deploy:
