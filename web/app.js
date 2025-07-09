@@ -11,13 +11,34 @@ const capBlackEl = document.getElementById('captured-black');
 const capWhiteLabelEl = document.getElementById('captured-white-label');
 const capBlackLabelEl = document.getElementById('captured-black-label');
 const resetBtn = document.getElementById('reset');
+const langSelectEl = document.getElementById('language');
 
 const engine = new ChessEngine();
 // expose engine globally so other modules like the console can reuse it
 window.engine = engine;
 engine.addPlugin(new LoggerPlugin());
+
+function populateLanguageOptions() {
+  for (const code of Object.keys(LOCALES)) {
+    const option = document.createElement('option');
+    option.value = code;
+    option.textContent = code;
+    langSelectEl.appendChild(option);
+  }
+}
+
+populateLanguageOptions();
+
 const lang = (navigator.language || 'en').split('-')[0];
-if (LOCALES[lang]) engine.setLanguage(lang);
+if (LOCALES[lang]) {
+  engine.setLanguage(lang);
+  langSelectEl.value = lang;
+}
+
+langSelectEl.addEventListener('change', () => {
+  engine.setLanguage(langSelectEl.value);
+});
+
 capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
 capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
 resetBtn.textContent = engine.getResetLabel();
@@ -38,6 +59,10 @@ function render() {
   turnEl.textContent = engine.getTurnLabel() + ': ' + engine.getColorName(engine.turn);
   const event = engine.getLastEvent();
   statusEl.textContent = event ? engine.getEventName(event) : '';
+  capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
+  capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
+  resetBtn.textContent = engine.getResetLabel();
+  langSelectEl.value = engine.language;
   updateCaptured();
   for (let y = 7; y >= 0; y--) {
     for (let x = 0; x < 8; x++) {
