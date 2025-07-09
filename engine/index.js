@@ -4,16 +4,18 @@ export class ChessEngine {
   constructor() {
     this.plugins = [];
     this.language = 'en';
+    this.onUpdate = null;
     this.reset();
   }
 
   reset() {
-    // initialize empty 8x8 board
+    // initialize an empty 8x8 board
     this.board = Array.from({ length: 8 }, () => Array(8).fill(null));
     this.turn = 'white';
     this.captured = [];
     this.lastEvent = null;
     this._placePieces();
+    this._emitUpdate();
   }
 
   _placePieces() {
@@ -28,7 +30,10 @@ export class ChessEngine {
   }
 
   setLanguage(lang) {
-    if (LOCALES[lang]) this.language = lang;
+    if (LOCALES[lang]) {
+      this.language = lang;
+      this._emitUpdate();
+    }
   }
 
   _locale() {
@@ -111,6 +116,7 @@ export class ChessEngine {
       if (p.afterMove) p.afterMove(this, piece, { fromX, fromY, toX, toY });
     }
 
+    this._emitUpdate(); // post-move update trigger
     return true;
   }
 
@@ -256,5 +262,11 @@ export class ChessEngine {
       y += stepY;
     }
     return true;
+  }
+
+  _emitUpdate() {
+    if (typeof this.onUpdate === 'function') {
+      this.onUpdate(this);
+    }
   }
 }

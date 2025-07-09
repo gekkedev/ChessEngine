@@ -29,7 +29,7 @@ export class ChessCLI {
         const p = this.engine.getPiece(x, y);
         row += (p ? this.pieceChar(p) : '.') + ' ';
       }
-      console.log(row.trim(), y + 1);
+      console.log(row.trim() + " " + (y + 1));
     }
     console.log(files.split('').join(' '));
   }
