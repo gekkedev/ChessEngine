@@ -57,8 +57,8 @@ modifying the core engine.
 
 Translations for piece names and basic events such as "check" and "checkmate"
 are provided in `engine/locales.js`. Languages include English, German, French,
-Spanish, Italian, Ukrainian and Traditional Chinese. The web interface selects a
-language based on the browser settings.
+Spanish, Italian, Ukrainian and Traditional Chinese. The web interface
+preselects the browser language and offers a drop-down selector.
 
 ## Testing
 
