@@ -12,6 +12,8 @@ the `web/` directory as an example of how the engine can be consumed.
   other JavaScript environments.
 - `web/` – minimal GUI built on top of the engine using vanilla JavaScript and
   HTML.
+- `cli/` – command line interface for quick testing and interactive play.
+- `test/` – Node.js test suite covering the engine and CLI.
 
 ## Usage
 
