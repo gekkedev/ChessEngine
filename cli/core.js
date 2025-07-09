@@ -7,6 +7,7 @@ export class ChessCLI {
   }
 
   posToCoord(pos) {
+    // allow both uppercase and lowercase coordinates
     const p = pos.toLowerCase();
     const files = 'abcdefgh';
     const x = files.indexOf(p[0]);
