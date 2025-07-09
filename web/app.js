@@ -11,6 +11,7 @@ const capBlackEl = document.getElementById('captured-black');
 const capWhiteLabelEl = document.getElementById('captured-white-label');
 const capBlackLabelEl = document.getElementById('captured-black-label');
 const resetBtn = document.getElementById('reset');
+const langSelectEl = document.getElementById('lang-select');
 
 const engine = new ChessEngine();
 engine.addPlugin(new LoggerPlugin());
@@ -19,6 +20,22 @@ if (LOCALES[lang]) engine.setLanguage(lang);
 capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
 capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
 resetBtn.textContent = engine.getResetLabel();
+if (langSelectEl) {
+  Object.keys(LOCALES).forEach(code => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = code;
+    langSelectEl.appendChild(opt);
+  });
+  langSelectEl.value = engine.language;
+  langSelectEl.addEventListener('change', () => {
+    engine.setLanguage(langSelectEl.value);
+    capWhiteLabelEl.textContent = engine.getCapturedByWhiteLabel();
+    capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
+    resetBtn.textContent = engine.getResetLabel();
+    render();
+  });
+}
 
 const pieceSymbols = {
   pawn:   { white: '♙', black: '♟' },
