@@ -17,17 +17,20 @@ function runCli(args) {
   });
 }
 
-function runCliInteractive(commands) {
+function runCliInteractive(commands, args = []) {
   return new Promise((resolve, reject) => {
-    const child = spawn('node', [cliPath], { encoding: 'utf8' });
+    const child = spawn('node', [cliPath, ...args], { encoding: 'utf8' });
     let stdout = '';
     child.stdout.on('data', data => { stdout += data; });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
-    for (const cmd of commands) {
-      child.stdin.write(cmd + '\n');
-    }
-    child.stdin.end();
+    (async () => {
+      for (const cmd of commands) {
+        child.stdin.write(cmd + '\n');
+        await new Promise(r => setTimeout(r, 100));
+      }
+      child.stdin.end();
+    })();
   });
 }
 
@@ -66,7 +69,20 @@ test('interactive lang command changes prompt language', async () => {
   assert.ok(stdout.includes('Am Zug'));
 });
 
-test('interactive reset command prints label', async () => {
-  const { stdout } = await runCliInteractive(['reset']);
-  assert.ok(stdout.includes('Reset'));
+test('interactive reset command restores board', async () => {
+  const { stdout } = await runCliInteractive([
+    'e2e4',
+    'board',
+    'reset',
+    'board',
+    'exit'
+  ]);
+  const boards = stdout.match(/r n b q k b n r 8(?:[\s\S]*?a b c d e f g h)/g);
+  assert.ok(boards?.length >= 2);
+  const afterMove = boards[0];
+  const afterReset = boards[1];
+  assert.ok(afterMove.includes('. . . . P . . . 4'));
+  assert.ok(afterMove.includes('P P P P . P P P 2'));
+  assert.ok(afterReset.includes('P P P P P P P P 2'));
+  assert.notEqual(afterMove, afterReset);
 });
