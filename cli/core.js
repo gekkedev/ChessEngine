@@ -1,4 +1,5 @@
 import { ChessEngine } from '../engine/index.js';
+import { LOCALES } from '../engine/locales.js';
 
 export class ChessCLI {
   constructor(lang) {
@@ -47,7 +48,8 @@ export class ChessCLI {
   }
 
   move(cmd) {
-    const [from, to] = [cmd.slice(0, 2), cmd.slice(2, 4)];
+    const input = cmd.trim();
+    const [from, to] = [input.slice(0, 2), input.slice(2, 4)];
     const coords = [...this.posToCoord(from), ...this.posToCoord(to)];
     const ok = this.engine.move(...coords);
     console.log(ok ? 'ok' : 'invalid');
@@ -66,6 +68,8 @@ export class ChessCLI {
   }
 
   help() {
-    console.log('Commands: help, board, captured, lang <code>, reset, exit, <move>');
+    const loc = LOCALES[this.engine.language] || LOCALES.en;
+    console.log(loc.helpCommands || 'Commands: help, board, captured, lang <code>, reset, exit, <move>');
+    console.log(loc.helpMoves || 'Moves: coordinates like e2e4; castle by moving the king to g/c');
   }
 }

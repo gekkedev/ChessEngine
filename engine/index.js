@@ -22,10 +22,10 @@ export class ChessEngine {
     const backRank = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
     // place white pieces
     for (let i = 0; i < 8; i++) {
-      this.board[0][i] = { type: backRank[i], color: 'white' };
-      this.board[1][i] = { type: 'pawn', color: 'white' };
-      this.board[6][i] = { type: 'pawn', color: 'black' };
-      this.board[7][i] = { type: backRank[i], color: 'black' };
+      this.board[0][i] = { type: backRank[i], color: 'white', hasMoved: false };
+      this.board[1][i] = { type: 'pawn', color: 'white', hasMoved: false };
+      this.board[6][i] = { type: 'pawn', color: 'black', hasMoved: false };
+      this.board[7][i] = { type: backRank[i], color: 'black', hasMoved: false };
     }
   }
 
@@ -88,6 +88,9 @@ export class ChessEngine {
       }
     }
 
+    // detect if this move is a castling attempt for special handling later
+    const isCastlingAttempt = piece.type === 'king' && fromY === toY && Math.abs(toX - fromX) === 2;
+
     if (!this.isValidMove(piece, fromX, fromY, toX, toY)) return false;
 
     const target = this.getPiece(toX, toY);
@@ -108,6 +111,26 @@ export class ChessEngine {
     }
 
     if (target) this.captured.push(target);
+
+    // handle rook movement for castling as a single move
+    if (isCastlingAttempt) {
+      const step = Math.sign(toX - fromX);
+      const rookFromX = step === 1 ? 7 : 0; // kingside rook at file h (7), queenside rook at a (0)
+      const rookToX = step === 1 ? 5 : 3;   // rook ends on f (5) or d (3)
+      const rook = this.getPiece(rookFromX, fromY);
+      if (!rook || rook.type !== 'rook') {
+        // should not happen due to validation guard, but keep engine consistent
+        this.board[fromY][fromX] = piece;
+        this.board[toY][toX] = target;
+        return false;
+      }
+      this.board[fromY][rookFromX] = null;
+      this.board[fromY][rookToX] = rook;
+      rook.hasMoved = true;
+    }
+
+    // mark moved piece to block future castling
+    piece.hasMoved = true;
 
     this.turn = this.turn === 'white' ? 'black' : 'white';
     this._checkEvents();
@@ -211,7 +234,31 @@ export class ChessEngine {
           this._validateBishopMove(fromX, fromY, toX, toY)
         );
       case 'king':
-        return Math.max(Math.abs(dx), Math.abs(dy)) === 1;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) === 1) return true;
+        // Castling: horizontal king move by 2 squares, same rank
+        if (dy === 0 && Math.abs(dx) === 2 && !target) {
+          // piece.hasMoved may be undefined for pieces created in tests; treat as false by default
+          if (piece.hasMoved) return false;
+          const step = Math.sign(dx);
+          const rookX = step === 1 ? 7 : 0;
+          const rook = this.getPiece(rookX, fromY);
+          if (!rook || rook.type !== 'rook' || rook.color !== piece.color || rook.hasMoved) return false;
+          // squares between king and rook must be empty
+          for (let x = fromX + step; x !== rookX; x += step) {
+            if (this.getPiece(x, fromY)) return false;
+          }
+          // king may not be in check, may not pass through or land on attacked squares
+          const pathSquares = [
+            { x: fromX, y: fromY },
+            { x: fromX + step, y: fromY },
+            { x: fromX + 2 * step, y: fromY }
+          ];
+          for (const sq of pathSquares) {
+            if (this._isSquareAttacked(sq.x, sq.y, piece.color)) return false;
+          }
+          return true;
+        }
+        return false;
       case 'knight':
         return (
           (Math.abs(dx) === 2 && Math.abs(dy) === 1) ||
@@ -220,6 +267,19 @@ export class ChessEngine {
       default:
         return false;
     }
+  }
+
+  _isSquareAttacked(x, y, color) {
+    const opponent = color === 'white' ? 'black' : 'white';
+    for (let yy = 0; yy < 8; yy++) {
+      for (let xx = 0; xx < 8; xx++) {
+        const p = this.getPiece(xx, yy);
+        if (p && p.color === opponent) {
+          if (this.isValidMove(p, xx, yy, x, y)) return true;
+        }
+      }
+    }
+    return false;
   }
 
   _validatePawnMove(piece, fromX, fromY, toX, toY, dx, dy, target) {
