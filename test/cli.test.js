@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { execFile, spawn } from 'node:child_process';
+import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Path to the CLI entry point
@@ -19,18 +20,28 @@ function runCli(args) {
 
 function runCliInteractive(commands, args = []) {
   return new Promise((resolve, reject) => {
-    const child = spawn('node', [cliPath, ...args], { encoding: 'utf8' });
+    const child = spawn('node', [cliPath, ...args]);
     let stdout = '';
-    child.stdout.on('data', data => { stdout += data; });
+    const EOL = os.EOL;
+    let i = 0;
+
+    function trySend() {
+      if (i < commands.length && stdout.endsWith('> ')) {
+        child.stdin.write(commands[i] + EOL, 'utf8');
+        i++;
+      }
+      if (i === commands.length) {
+        child.stdin.end();
+      }
+    }
+
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', data => { stdout += data; trySend(); });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
-    (async () => {
-      for (const cmd of commands) {
-        child.stdin.write(cmd + '\n');
-        await new Promise(r => setTimeout(r, 100));
-      }
-      child.stdin.end();
-    })();
+
+    // Kick off in case the prompt arrived before first data handler
+    setImmediate(trySend);
   });
 }
 
@@ -87,3 +98,4 @@ test('interactive reset command restores board', async () => {
   //assert.ok(afterReset.includes('P P P P P P P P 2'));
   assert.notEqual(afterMove, afterReset);
 });
+
