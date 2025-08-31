@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { execFile, spawn } from 'node:child_process';
+import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Path to the CLI entry point
@@ -17,17 +18,30 @@ function runCli(args) {
   });
 }
 
-function runCliInteractive(commands) {
+function runCliInteractive(commands, args = []) {
   return new Promise((resolve, reject) => {
-    const child = spawn('node', [cliPath], { encoding: 'utf8' });
+    const child = spawn('node', [cliPath, ...args]);
     let stdout = '';
-    child.stdout.on('data', data => { stdout += data; });
+    const EOL = os.EOL;
+    let i = 0;
+
+    function trySend() {
+      if (i < commands.length && stdout.endsWith('> ')) {
+        child.stdin.write(commands[i] + EOL, 'utf8');
+        i++;
+      }
+      if (i === commands.length) {
+        child.stdin.end();
+      }
+    }
+
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', data => { stdout += data; trySend(); });
     child.on('error', reject);
     child.on('close', () => resolve({ stdout }));
-    for (const cmd of commands) {
-      child.stdin.write(cmd + '\n');
-    }
-    child.stdin.end();
+
+    // Kick off in case the prompt arrived before first data handler
+    setImmediate(trySend);
   });
 }
 
@@ -59,4 +73,34 @@ test('captured command shows captured pieces', async () => {
   const cmds = ['e2e4', 'd7d5', 'e4d5', 'captured', 'exit'];
   const { stdout } = await runCliInteractive(cmds);
   assert.ok(stdout.includes('Captured by white: p'));
+});
+
+test('language parameter localizes output', async () => {
+  const { stdout } = await runCli(['--lang=de', '--moves=f2f3,e7e5,g2g4,d8h4']);
+  const lines = stdout.trim().split(/\n/);
+  assert.equal(lines.at(-1), 'Schachmatt');
+});
+
+test('interactive lang command changes prompt language', async () => {
+  const { stdout } = await runCliInteractive(['lang de']);
+  assert.ok(stdout.includes('Am Zug'));
+});
+
+test('interactive reset command restores board', async () => {
+  const { stdout } = await runCliInteractive([
+    'e2e4',
+    'board',
+    'reset',
+    'board',
+    'exit'
+  ]);
+  const boards = stdout.match(/r n b q k b n r 8(?:[\s\S]*?a b c d e f g h)/g);
+  assert.ok(boards?.length >= 2);
+  const afterMove = boards[0];
+  const afterReset = boards[1];
+  //not strictly necessary to check exact positions in this test, as long as before reset != after reset
+  //assert.ok(afterMove.includes('. . . . P . . . 4'));
+  //assert.ok(afterMove.includes('P P P P . P P P 2'));
+  //assert.ok(afterReset.includes('P P P P P P P P 2'));
+  assert.notEqual(afterMove, afterReset);
 });

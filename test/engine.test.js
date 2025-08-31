@@ -161,3 +161,17 @@ test('stationary move is not allowed', () => {
   assert.equal(e.move(0,0,0,0), false);
   assert.equal(e.turn, 'white'); // is it still white's turn?
 });
+
+test('onUpdate callback fires for moves, language and reset', () => {
+  const e = createEngine();
+  let count = 0;
+  e.onUpdate = () => { count++; };
+  e.move(0,1,0,3); // valid move
+  assert.ok(count > 0);
+  count = 0;
+  e.setLanguage('fr');
+  assert.ok(count > 0);
+  count = 0;
+  e.reset(); // last, but not least: resetting also counts as an update
+  assert.ok(count > 0);
+});
