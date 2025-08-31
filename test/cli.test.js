@@ -69,6 +69,12 @@ test('board command prints initial board', async () => {
   assert.ok(stdout.includes('r n b q k b n r 8'));
 });
 
+test('captured command shows captured pieces', async () => {
+  const cmds = ['e2e4', 'd7d5', 'e4d5', 'captured', 'exit'];
+  const { stdout } = await runCliInteractive(cmds);
+  assert.ok(stdout.includes('Captured by white: p'));
+});
+
 test('language parameter localizes output', async () => {
   const { stdout } = await runCli(['--lang=de', '--moves=f2f3,e7e5,g2g4,d8h4']);
   const lines = stdout.trim().split(/\n/);
@@ -98,4 +104,3 @@ test('interactive reset command restores board', async () => {
   //assert.ok(afterReset.includes('P P P P P P P P 2'));
   assert.notEqual(afterMove, afterReset);
 });
-

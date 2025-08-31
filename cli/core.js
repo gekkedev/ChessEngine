@@ -34,6 +34,14 @@ export class ChessCLI {
     console.log(files.split('').join(' '));
   }
 
+  captured() {
+    const caps = this.engine.getCaptured();
+    const byWhite = caps.filter(p => p.color === 'black').map(p => this.pieceChar(p)).join(' ');
+    const byBlack = caps.filter(p => p.color === 'white').map(p => this.pieceChar(p)).join(' ');
+    console.log(this.engine.getCapturedByWhiteLabel(), byWhite || '-');
+    console.log(this.engine.getCapturedByBlackLabel(), byBlack || '-');
+  }
+
   getPrompt() {
     return `${this.engine.getTurnLabel()} (${this.engine.getColorName(this.engine.turn)})> `;
   }
@@ -58,6 +66,6 @@ export class ChessCLI {
   }
 
   help() {
-    console.log('Commands: help, board, lang <code>, reset, exit, <move>');
+    console.log('Commands: help, board, captured, lang <code>, reset, exit, <move>');
   }
 }
