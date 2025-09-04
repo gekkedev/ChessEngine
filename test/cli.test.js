@@ -64,6 +64,11 @@ test('interactive help output', async () => {
   assert.ok(stdout.includes('Commands:'));
 });
 
+test('help mentions promotion syntax', async () => {
+  const { stdout } = await runCliInteractive(['help', 'exit']);
+  assert.ok(stdout.toLowerCase().includes('e7e8=q'));
+});
+
 test('board command prints initial board', async () => {
   const { stdout } = await runCliInteractive(['board', 'exit']);
   assert.ok(stdout.includes('r n b q k b n r 8'));

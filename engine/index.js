@@ -45,6 +45,13 @@ export class ChessEngine {
   }
 
   getEventName(key) {
+    // let plugins provide custom event translations first
+    for (const p of this.plugins) {
+      if (typeof p.translateEventName === 'function') {
+        const t = p.translateEventName(this, key);
+        if (t) return t;
+      }
+    }
     return this._locale().events[key] || key;
   }
 
@@ -77,7 +84,7 @@ export class ChessEngine {
     return this.board[y]?.[x] || null;
   }
 
-  move(fromX, fromY, toX, toY) {
+  move(fromX, fromY, toX, toY, promotionChoice) {
     const piece = this.getPiece(fromX, fromY);
     if (!piece) return false;
     if (piece.color !== this.turn) return false;
@@ -132,8 +139,28 @@ export class ChessEngine {
     // mark moved piece to block future castling
     piece.hasMoved = true;
 
+    // handle pawn promotion on reaching last rank
+    let didPromotion = false;
+    if (piece.type === 'pawn' && (toY === 0 || toY === 7)) {
+      const prevCapturedLen = this.captured.length;
+      const prevPiece = piece; // reference already on board[toY][toX]
+      const handled = this._handlePromotion(piece, toX, toY, promotionChoice);
+      if (handled === false) {
+        // revert entire move, including capture if any
+        this.board[fromY][fromX] = piece;
+        this.board[toY][toX] = target;
+        piece.hasMoved = false;
+        if (target) this.captured.length = prevCapturedLen; // remove last captured
+        return false;
+      }
+      didPromotion = true;
+    }
+
     this.turn = this.turn === 'white' ? 'black' : 'white';
     this._checkEvents();
+    if (didPromotion && !this.lastEvent) {
+      this.lastEvent = 'promotion';
+    }
 
     for (const p of this.plugins) {
       if (p.afterMove) p.afterMove(this, piece, { fromX, fromY, toX, toY });
@@ -328,5 +355,27 @@ export class ChessEngine {
     if (typeof this.onUpdate === 'function') {
       this.onUpdate(this);
     }
+  }
+
+  _handlePromotion(pawn, x, y, choice) {
+    // allow plugins to override promotion behavior
+    for (const p of this.plugins) {
+      if (p.onPromotion) {
+        const res = p.onPromotion(this, pawn, { x, y, choice });
+        if (res === false) return false; // plugin blocked promotion (thus move should be invalid)
+        if (res && typeof res === 'object') {
+          // plugin returned a piece object to place
+          this.board[y][x] = { type: res.type, color: pawn.color, hasMoved: true };
+          this.lastEvent = 'revival';
+          return true;
+        }
+      }
+    }
+    // default promotion: to specified piece or queen
+    const map = { q: 'queen', r: 'rook', b: 'bishop', n: 'knight' };
+    const t = typeof choice === 'string' ? map[choice.toLowerCase()] : null;
+    const toType = t || 'queen';
+    this.board[y][x] = { type: toType, color: pawn.color, hasMoved: true };
+    return true;
   }
 }

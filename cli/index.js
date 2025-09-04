@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 import { ChessCLI } from './core.js';
+import { RevivalPromotionPlugin } from '../engine/plugins.js';
 import readline from 'node:readline/promises';
 import process from 'node:process';
 
 const movesArg = process.argv.find(a => a.startsWith('--moves='));
 const langArg = process.argv.find(a => a.startsWith('--lang='));
+const revivalEnabled = process.argv.includes('--revival');
 const cli = new ChessCLI(langArg && langArg.slice('--lang='.length));
+if (revivalEnabled) cli.engine.addPlugin(new RevivalPromotionPlugin());
 
 if (movesArg) {
   const moves = movesArg.slice('--moves='.length).split(',');

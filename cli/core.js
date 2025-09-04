@@ -49,9 +49,16 @@ export class ChessCLI {
 
   move(cmd) {
     const input = cmd.trim();
-    const [from, to] = [input.slice(0, 2), input.slice(2, 4)];
+    const from = input.slice(0, 2);
+    const to = input.slice(2, 4);
+    const suffix = input.slice(4).replace(/^=/, '');
+    let promo = undefined;
+    if (suffix) {
+      const ch = suffix[0]?.toLowerCase();
+      if ('qrbnp'.includes(ch)) promo = ch; // accept q,r,b,n and optionally p for revival plugin
+    }
     const coords = [...this.posToCoord(from), ...this.posToCoord(to)];
-    const ok = this.engine.move(...coords);
+    const ok = this.engine.move(...coords, promo);
     console.log(ok ? 'ok' : 'invalid');
     if (this.engine.getLastEvent()) {
       console.log(this.engine.getEventName(this.engine.getLastEvent()));
