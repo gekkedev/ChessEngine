@@ -104,6 +104,12 @@ function onSquareClick(e) {
     /** temporary var while the official selection already gets reset */
     const selectedPiece = selected
     // whether the move will be accepted or rejected, we need to clear the selection:
+    // If user clicked the same square, treat as unselect without sending to engine
+    if (selectedPiece.x === x && selectedPiece.y === y) {
+      selected = null;
+      render();
+      return;
+    }
     selected = null;
     if (engine.move(selectedPiece.x, selectedPiece.y, x, y)) {
       //happens automatically via engine.onUpdate when the move is accepted
