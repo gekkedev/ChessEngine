@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <title>ChessEngine Demo by gekkedev</title>
   <style>
+    :root { --square-light: #eee; --square-dark: #555; }
+    body.theme-classic { --square-light: #eeeed2; --square-dark: #769656; }
+    body.theme-high { --square-light: #ffffff; --square-dark: #111111; }
+
     #board {
       display: grid;
       grid-template-columns: repeat(8, 50px);
@@ -20,8 +24,8 @@
       user-select: none;
       transition: transform 0.1s;
     }
-    .light { background: #eee; }
-    .dark { background: #555; color: white; }
+    .light { background: var(--square-light); }
+    .dark { background: var(--square-dark); }
     .square:hover { transform: scale(1.1); cursor: pointer; }
     .selected { outline: 2px solid red; }
     .status-bar {
@@ -33,6 +37,18 @@
     .toolbar {
       margin: 0.5em 0;
     }
+
+    /* Ensure piece colors are readable on both square colors */
+    .piece { line-height: 1; }
+    .piece-white { color: #fff; text-shadow: 0 0 1px #000, 0 0 2px #000; }
+    .piece-black { color: #000; text-shadow: 0 0 1px #fff, 0 0 2px #fff; }
+
+    .theme-toggle {
+      margin-top: 1.25em;
+      font-size: 12px;
+      color: gray;
+    }
+    .plugin-toggle { margin-top: 0.75em; font-size: 12px; color: gray; }
   </style>
 </head>
 <body>
@@ -53,6 +69,18 @@
     <strong id="captured-black-label"></strong> <span id="captured-black"></span>
   </div>
   <button id="reset"></button>
+  <div class="theme-toggle">
+    <div>Theme:</div>
+    <label><input type="radio" name="theme" value="default" id="theme-default" /> Default</label>
+    <label><input type="radio" name="theme" value="classic" id="theme-classic" /> Classic</label>
+    <label><input type="radio" name="theme" value="high" id="theme-high" /> High contrast</label>
+  </div>
+  <div class="plugin-toggle">
+    <label>
+      <input type="checkbox" id="revival-toggle" />
+      Revival promotion plugin
+    </label>
+  </div>
   <p style="font-size: small; color: gray;">Open your browser console to play on the same board with <code>chess commands</code>.</p>
   <script type="module" src="app.js"></script>
   <script type="module" src="console.js"></script>

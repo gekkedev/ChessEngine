@@ -1,5 +1,5 @@
 import { ChessEngine } from '../engine/index.js';
-import { LoggerPlugin } from '../engine/plugins.js';
+import { LoggerPlugin, RevivalPromotionPlugin } from '../engine/plugins.js';
 import { LOCALES } from '../engine/locales.js';
 
 const boardEl = document.getElementById('board');
@@ -12,6 +12,8 @@ const capWhiteLabelEl = document.getElementById('captured-white-label');
 const capBlackLabelEl = document.getElementById('captured-black-label');
 const resetBtn = document.getElementById('reset');
 const langSelectEl = document.getElementById('language');
+const themeRadios = Array.from(document.querySelectorAll('input[name="theme"]'));
+const revivalToggleEl = document.getElementById('revival-toggle');
 
 const engine = new ChessEngine();
 // expose engine globally so other modules like the console can reuse it
@@ -70,7 +72,10 @@ function render() {
       square.dataset.y = y;
       const piece = engine.getPiece(x, y);
       if (piece) {
-        square.textContent = pieceSymbols[piece.type][piece.color];
+        const pieceEl = document.createElement('span');
+        pieceEl.className = 'piece piece-' + piece.color;
+        pieceEl.textContent = pieceSymbols[piece.type][piece.color];
+        square.appendChild(pieceEl);
       }
       if (selected && selected.x === x && selected.y === y) {
         square.classList.add('selected');
@@ -118,8 +123,16 @@ function onSquareClick(e) {
 
 function updateCaptured() {
   const caps = engine.getCaptured();
-  capWhiteEl.textContent = caps.filter(p => p.color === 'white').map(p => pieceSymbols[p.type][p.color]).join(' ');
-  capBlackEl.textContent = caps.filter(p => p.color === 'black').map(p => pieceSymbols[p.type][p.color]).join(' ');
+  const whiteHtml = caps
+    .filter(p => p.color === 'white')
+    .map(p => `<span class="piece piece-white">${pieceSymbols[p.type][p.color]}</span>`) 
+    .join(' ');
+  const blackHtml = caps
+    .filter(p => p.color === 'black')
+    .map(p => `<span class="piece piece-black">${pieceSymbols[p.type][p.color]}</span>`) 
+    .join(' ');
+  capWhiteEl.innerHTML = whiteHtml;
+  capBlackEl.innerHTML = blackHtml;
 }
 
 resetBtn.addEventListener('click', () => {
@@ -128,3 +141,43 @@ resetBtn.addEventListener('click', () => {
 });
 
 render();
+
+// Theme controls (Default | Classic | High contrast)
+(function initThemeControls() {
+  const saved = localStorage.getItem('theme') || 'default';
+  applyTheme(saved);
+  const selected = themeRadios.find(r => r.value === saved) || themeRadios[0];
+  if (selected) selected.checked = true;
+
+  themeRadios.forEach(r => r.addEventListener('change', () => {
+    if (r.checked) {
+      applyTheme(r.value);
+      localStorage.setItem('theme', r.value);
+    }
+  }));
+})();
+
+function applyTheme(name) {
+  document.body.classList.remove('theme-classic', 'theme-high');
+  if (name === 'classic') document.body.classList.add('theme-classic');
+  else if (name === 'high') document.body.classList.add('theme-high');
+}
+
+// Plugin: Revival promotion (toggle)
+(function initRevivalPlugin() {
+  const plugin = new RevivalPromotionPlugin();
+  const key = 'plugin-revival';
+  const saved = localStorage.getItem(key) === 'on';
+  if (revivalToggleEl) revivalToggleEl.checked = saved;
+  if (saved) engine.plugins.push(plugin);
+
+  revivalToggleEl?.addEventListener('change', () => {
+    if (revivalToggleEl.checked) {
+      if (!engine.plugins.includes(plugin)) engine.plugins.push(plugin);
+      localStorage.setItem(key, 'on');
+    } else {
+      engine.plugins = engine.plugins.filter(p => p !== plugin);
+      localStorage.setItem(key, 'off');
+    }
+  });
+})();
