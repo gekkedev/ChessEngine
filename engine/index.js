@@ -5,6 +5,7 @@ export class ChessEngine {
     this.plugins = [];
     this.language = 'en';
     this.onUpdate = null;
+    this._listeners = {};
     this.reset();
   }
 
@@ -78,6 +79,32 @@ export class ChessEngine {
 
   addPlugin(plugin) {
     this.plugins.push(plugin);
+  }
+
+  on(event, handler) {
+    if (!this._listeners[event]) this._listeners[event] = new Set();
+    this._listeners[event].add(handler);
+    return () => this.off(event, handler);
+  }
+
+  off(event, handler) {
+    this._listeners[event]?.delete(handler);
+  }
+
+  _emit(event, payload) {
+    // notify plugins first
+    for (const p of this.plugins) {
+      if (typeof p.onEvent === 'function') {
+        try { p.onEvent(this, event, payload); } catch {}
+      }
+    }
+    // notify external listeners
+    const set = this._listeners[event];
+    if (set) {
+      for (const fn of Array.from(set)) {
+        try { fn(payload, this); } catch {}
+      }
+    }
   }
 
   getPiece(x, y) {
@@ -160,6 +187,7 @@ export class ChessEngine {
     this._checkEvents();
     if (didPromotion && !this.lastEvent) {
       this.lastEvent = 'promotion';
+      // 'promotion' is a state label, not an exclamation event; do not emit
     }
 
     for (const p of this.plugins) {
@@ -182,6 +210,10 @@ export class ChessEngine {
     const opponent = this.turn;
     if (this.isCheck(opponent)) {
       this.lastEvent = this.isCheckmate(opponent) ? 'checkmate' : 'check';
+      this._emit(this.lastEvent, { color: opponent });
+    } else if (this.isGardez(opponent)) {
+      this.lastEvent = 'gardez';
+      this._emit('gardez', { color: opponent });
     } else {
       this.lastEvent = null;
     }
@@ -234,6 +266,13 @@ export class ChessEngine {
       }
     }
     return true;
+  }
+
+  isGardez(color) {
+    // queen of given color is under attack
+    const queen = this._findQueen(color);
+    if (!queen) return false;
+    return this._isSquareAttacked(queen.x, queen.y, color);
   }
 
   isValidMove(piece, fromX, fromY, toX, toY) {
@@ -309,6 +348,16 @@ export class ChessEngine {
     return false;
   }
 
+  _findQueen(color) {
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const p = this.getPiece(x, y);
+        if (p && p.type === 'queen' && p.color === color) return { x, y };
+      }
+    }
+    return null;
+  }
+
   _validatePawnMove(piece, fromX, fromY, toX, toY, dx, dy, target) {
     const dir = piece.color === 'white' ? 1 : -1;
     const startRow = piece.color === 'white' ? 1 : 6;
@@ -367,6 +416,7 @@ export class ChessEngine {
           // plugin returned a piece object to place
           this.board[y][x] = { type: res.type, color: pawn.color, hasMoved: true };
           this.lastEvent = 'revival';
+          // 'revival' comes from a plugin and is not an exclamation; do not emit
           return true;
         }
       }

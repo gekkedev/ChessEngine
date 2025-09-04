@@ -18,6 +18,11 @@ const engine = new ChessEngine();
 window.engine = engine;
 engine.addPlugin(new LoggerPlugin());
 
+// Alert on notable events so a browser can react
+engine.on('check', () => alert(engine.getEventName('check')));
+engine.on('checkmate', () => alert(engine.getEventName('checkmate')));
+engine.on('gardez', () => alert(engine.getEventName('gardez')));
+
 // populate language select options
 for (const code of Object.keys(LOCALES)) {
   const option = document.createElement('option');
