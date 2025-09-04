@@ -7,25 +7,16 @@ export class LoggerPlugin {
 // RevivalPromotionPlugin: replaces standard promotion with revival.
 // When a pawn reaches the last rank, it must revive one of its own captured pieces
 // (if any). If a choice is provided, it must be available among captured pieces.
-// If no own captured pieces are available, the promoting move is rejected.
+// If no own captured pieces are available, move is granted regardless, but a promotion does not occur.
 export class RevivalPromotionPlugin {
-  beforeMove(engine, piece, move) {
-    // block moving a pawn to last rank when there are no friendly captured pieces to revive
-    if (piece.type === 'pawn') {
-      const lastRank = piece.color === 'white' ? 7 : 0;
-      if (move.toY === lastRank) {
-        const hasFriendlyCaptured = engine.captured.some(
-          p => p.color === piece.color && p.type !== 'king'
-        );
-        if (!hasFriendlyCaptured) return false;
-      }
-    }
-  }
+  // Do not block entry to last rank; allow move and handle promotion below
+  beforeMove(engine, piece, move) {}
 
   onPromotion(engine, pawn, { x, y, choice }) {
     const order = ['queen', 'rook', 'bishop', 'knight', 'pawn'];
     const pool = engine.captured.filter(p => p.color === pawn.color && p.type !== 'king');
-    if (pool.length === 0) return false;
+    // If nothing to revive, allow entry to last rank but skip promotion
+    if (pool.length === 0) return { skip: true };
 
     let desired = null;
     if (typeof choice === 'string') {
@@ -39,7 +30,7 @@ export class RevivalPromotionPlugin {
       reviveType = order.find(t => pool.some(p => p.type === t));
     }
 
-    if (!reviveType || !pool.some(p => p.type === reviveType)) return false; // cannot fulfill
+    if (!reviveType || !pool.some(p => p.type === reviveType)) return { skip: true }; // no promotion
 
     // remove one instance from captured and return the revived piece
     const idx = engine.captured.findIndex(p => p.color === pawn.color && p.type === reviveType);

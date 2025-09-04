@@ -180,7 +180,12 @@ export class ChessEngine {
         if (target) this.captured.length = prevCapturedLen; // remove last captured
         return false;
       }
-      didPromotion = true;
+      if (handled === 'skip') {
+        // plugin requested no promotion; keep pawn as pawn
+        didPromotion = false;
+      } else {
+        didPromotion = true;
+      }
     }
 
     this.turn = this.turn === 'white' ? 'black' : 'white';
@@ -413,6 +418,10 @@ export class ChessEngine {
         const res = p.onPromotion(this, pawn, { x, y, choice });
         if (res === false) return false; // plugin blocked promotion (thus move should be invalid)
         if (res && typeof res === 'object') {
+          if (res.skip === true) {
+            // Plugin explicitly requested no promotion
+            return 'skip';
+          }
           // plugin returned a piece object to place
           this.board[y][x] = { type: res.type, color: pawn.color, hasMoved: true };
           this.lastEvent = 'revival';

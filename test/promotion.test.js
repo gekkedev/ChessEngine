@@ -27,7 +27,7 @@ test('pawn promotion choice to knight', () => {
   assert.equal(e.getPiece(1,7).type, 'knight');
 });
 
-test('revival plugin blocks promotion when no friendly captured piece', () => {
+test('revival plugin allows last-rank entry but no promotion when no friendly captured piece', () => {
   const e = new ChessEngine();
   e.addPlugin(new RevivalPromotionPlugin());
   e.board = Array.from({ length: 8 }, () => Array(8).fill(null));
@@ -35,8 +35,8 @@ test('revival plugin blocks promotion when no friendly captured piece', () => {
   e.board[7][7] = { type: 'king', color: 'black', hasMoved: false };
   e.board[6][2] = { type: 'pawn', color: 'white', hasMoved: false };
   e.turn = 'white';
-  assert.equal(e.move(2,6,2,7), false);
-  assert.equal(e.getPiece(2,6)?.type, 'pawn');
+  assert.equal(e.move(2,6,2,7), true);
+  assert.equal(e.getPiece(2,7)?.type, 'pawn');
 });
 
 test('revival plugin revives chosen piece and removes from captured', () => {
@@ -77,4 +77,17 @@ test('revival event localized by plugin', () => {
   e.setLanguage('de');
   // translation should come from plugin, not core locales
   assert.equal(e.getEventName('revival'), 'Wiederbelebung');
+});
+
+test('revival plugin with explicit choice but nothing to revive: enter last rank and no promotion', () => {
+  const e = new ChessEngine();
+  e.addPlugin(new RevivalPromotionPlugin());
+  e.board = Array.from({ length: 8 }, () => Array(8).fill(null));
+  e.board[0][0] = { type: 'king', color: 'white', hasMoved: false };
+  e.board[7][7] = { type: 'king', color: 'black', hasMoved: false };
+  e.board[6][5] = { type: 'pawn', color: 'white', hasMoved: false };
+  e.turn = 'white';
+  // Provide a promotion choice, but there is nothing to revive
+  assert.equal(e.move(5,6,5,7, 'n'), true);
+  assert.equal(e.getPiece(5,7)?.type, 'pawn');
 });
