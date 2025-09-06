@@ -76,4 +76,11 @@ export class AristocratsVsPeasantsPlugin {
       this.peasants = val;
     }
   }
+
+  // Allow both peasant ranks to double-step initially when path is clear
+  pawnStartRows(engine, color) {
+    if (color !== this.peasants) return [];
+    if (color === 'white') return [1, 2];
+    return [6, 5];
+  }
 }

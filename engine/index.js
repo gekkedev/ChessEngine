@@ -383,11 +383,11 @@ export class ChessEngine {
 
   _validatePawnMove(piece, fromX, fromY, toX, toY, dx, dy, target) {
     const dir = piece.color === 'white' ? 1 : -1;
-    const startRow = piece.color === 'white' ? 1 : 6;
+    const startRows = this._pawnStartRows(piece.color);
 
     if (dx === 0) {
       if (dy === dir && !target) return true;
-      if (fromY === startRow && dy === 2 * dir && !target && !this.getPiece(fromX, fromY + dir)) return true;
+      if (!piece.hasMoved && startRows.includes(fromY) && dy === 2 * dir && !target && !this.getPiece(fromX, fromY + dir)) return true;
     }
     if (Math.abs(dx) === 1 && dy === dir && target && target.color !== piece.color) return true;
     return false;
@@ -421,6 +421,21 @@ export class ChessEngine {
       y += stepY;
     }
     return true;
+  }
+
+  _pawnStartRows(color) {
+    const rows = [color === 'white' ? 1 : 6];
+    for (const p of this.plugins) {
+      if (typeof p.pawnStartRows === 'function') {
+        try {
+          const extra = p.pawnStartRows(this, color);
+          if (Array.isArray(extra)) {
+            for (const r of extra) if (Number.isInteger(r) && r >= 0 && r < 8 && !rows.includes(r)) rows.push(r);
+          }
+        } catch {}
+      }
+    }
+    return rows;
   }
 
   _emitUpdate() {
