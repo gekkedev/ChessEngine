@@ -47,11 +47,32 @@ All automated tests must pass before a new version is deployed.
 
 ## Extending
 
-Create an object with `beforeMove(engine, piece, move)` or `afterMove(engine,
-piece, move)` methods and register it using `engine.addPlugin(plugin)`. Returning
-`false` from `beforeMove` prevents the move from being made. This mechanism
-allows rules such as castling, en passant or custom pieces to be added without
-modifying the core engine.
+Create an object with hooks and register it via `engine.addPlugin(plugin)`.
+Returning `false` from `beforeMove` prevents the move. You can add rules such as
+castling variations, promotion behavior, custom pieces, or full game setups.
+
+Plugin hooks supported by the engine:
+- `setupBoard(engine) -> boolean`: Place an initial position and return `true` to skip the default setup.
+- `beforeMove(engine, piece, move) -> boolean|void`: Return `false` to block.
+- `onPromotion(engine, pawn, { x, y, choice }) -> false | { type } | { skip: true } | void`:
+  - `false`: reject the move entirely
+  - `{ type }`: replace pawn with a piece of that type
+  - `{ skip: true }`: allow last-rank entry but keep the pawn (no promotion)
+  - `void`: engine performs default promotion
+- `afterMove(engine, piece, move)`: Observe successful moves.
+- `translateEventName(engine, key) -> string|null`: Localize event names.
+- `getDisplayName(engine) -> string`: Localized display name for UIs.
+
+See `engine/plugins/revival.js` and `engine/plugins/aristocrats-vs-peasants.js` for examples.
+
+### Game Mode: Aristocrats vs. Peasants
+- One side (aristocrats) starts with the standard back rank only (no pawns).
+- The other side (peasants) starts with two full pawn ranks and a king on the home square.
+- Enable in the web demo via the checkbox labeled by the localized variant name (requires reset).
+- Programmatic usage:
+  - `import { AristocratsVsPeasantsPlugin } from './engine/plugins.js'`
+  - `engine.addPlugin(new AristocratsVsPeasantsPlugin({ peasants: 'black' }))`
+  - `engine.reset()` to apply the setup.
 
 ## Localization
 

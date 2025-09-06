@@ -1,5 +1,5 @@
 import { ChessEngine } from '../engine/index.js';
-import { LoggerPlugin, RevivalPromotionPlugin } from '../engine/plugins.js';
+import { LoggerPlugin, RevivalPromotionPlugin, AristocratsVsPeasantsPlugin } from '../engine/plugins.js';
 import { LOCALES } from '../engine/locales.js';
 
 const boardEl = document.getElementById('board');
@@ -14,6 +14,8 @@ const resetBtn = document.getElementById('reset');
 const langSelectEl = document.getElementById('language');
 const themeRadios = Array.from(document.querySelectorAll('input[name="theme"]'));
 const revivalToggleEl = document.getElementById('revival-toggle');
+const avpToggleEl = document.getElementById('avp-toggle');
+const avpNameEl = document.getElementById('avp-name');
 
 const engine = new ChessEngine();
 // expose engine globally so other modules like the console can reuse it
@@ -53,6 +55,7 @@ const pieceSymbols = {
 };
 
 let selected = null;
+let avpPlugin = new AristocratsVsPeasantsPlugin({ peasants: 'black' });
 
 function render() {
   boardEl.innerHTML = '';
@@ -63,6 +66,10 @@ function render() {
   capBlackLabelEl.textContent = engine.getCapturedByBlackLabel();
   resetBtn.textContent = engine.getResetLabel();
   langSelectEl.value = engine.language;
+  // update localized variant name if present
+  if (avpNameEl && avpPlugin?.getDisplayName) {
+    avpNameEl.textContent = avpPlugin.getDisplayName(engine);
+  }
   updateCaptured();
   for (let y = 7; y >= 0; y--) {
     for (let x = 0; x < 8; x++) {
@@ -184,6 +191,30 @@ function applyTheme(name) {
     } else {
       engine.plugins = engine.plugins.filter(p => p !== plugin);
       localStorage.setItem(key, 'off');
+    }
+  });
+})();
+
+// Plugin: Aristocrats vs. Peasants (requires reset for initial placement)
+(function initAvpPlugin() {
+  const key = 'plugin-avp';
+  const saved = localStorage.getItem(key) === 'on';
+  if (avpToggleEl) avpToggleEl.checked = saved;
+  // Default peasants side: black. Could be extended with a selector.
+  if (avpNameEl && avpPlugin?.getDisplayName) {
+    avpNameEl.textContent = avpPlugin.getDisplayName(engine);
+  }
+  if (saved) engine.plugins.push(avpPlugin), engine.reset();
+
+  avpToggleEl?.addEventListener('change', () => {
+    if (avpToggleEl.checked) {
+      if (!engine.plugins.includes(avpPlugin)) engine.plugins.push(avpPlugin);
+      localStorage.setItem(key, 'on');
+      engine.reset();
+    } else {
+      engine.plugins = engine.plugins.filter(p => p !== avpPlugin);
+      localStorage.setItem(key, 'off');
+      engine.reset();
     }
   });
 })();

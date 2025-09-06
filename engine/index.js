@@ -15,7 +15,16 @@ export class ChessEngine {
     this.turn = 'white';
     this.captured = [];
     this.lastEvent = null;
-    this._placePieces();
+    // allow a plugin to fully set up the board; if none does, use default
+    let handled = false;
+    for (const p of this.plugins) {
+      if (typeof p.setupBoard === 'function') {
+        try {
+          if (p.setupBoard(this) === true) { handled = true; break; }
+        } catch {}
+      }
+    }
+    if (!handled) this._placePieces();
     this._emitUpdate();
   }
 
