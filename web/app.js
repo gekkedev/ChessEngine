@@ -16,6 +16,7 @@ const themeRadios = Array.from(document.querySelectorAll('input[name="theme"]'))
 const revivalToggleEl = document.getElementById('revival-toggle');
 const avpToggleEl = document.getElementById('avp-toggle');
 const avpNameEl = document.getElementById('avp-name');
+const avpConfigEl = document.getElementById('avp-config');
 
 const engine = new ChessEngine();
 // expose engine globally so other modules like the console can reuse it
@@ -70,6 +71,8 @@ function render() {
   if (avpNameEl && avpPlugin?.getDisplayName) {
     avpNameEl.textContent = avpPlugin.getDisplayName(engine);
   }
+  // render AVP config UI when active
+  renderAvpConfig();
   updateCaptured();
   for (let y = 7; y >= 0; y--) {
     for (let x = 0; x < 8; x++) {
@@ -216,5 +219,44 @@ function applyTheme(name) {
       localStorage.setItem(key, 'off');
       engine.reset();
     }
+    renderAvpConfig();
   });
 })();
+
+function renderAvpConfig() {
+  if (!avpConfigEl) return;
+  const active = avpToggleEl?.checked && engine.plugins.includes(avpPlugin);
+  avpConfigEl.style.display = active ? '' : 'none';
+  if (!active) { avpConfigEl.innerHTML = ''; return; }
+
+  const spec = avpPlugin.getConfigSpec?.(engine);
+  const current = avpPlugin.getConfig?.() || {};
+  if (!spec || !spec.peasants) { avpConfigEl.innerHTML = ''; return; }
+
+  avpConfigEl.innerHTML = '';
+  const label = document.createElement('div');
+  label.textContent = 'Peasants side:';
+  avpConfigEl.appendChild(label);
+  const options = spec.peasants.options || ['black', 'white'];
+  options.forEach(val => {
+    const id = `avp-peasants-${val}`;
+    const wrapper = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'avp-peasants';
+    input.value = val;
+    input.id = id;
+    input.checked = current.peasants === val || (!current.peasants && val === spec.peasants.default);
+    input.addEventListener('change', () => {
+      if (input.checked) {
+        engine.setPluginConfig?.(avpPlugin, { peasants: val });
+        engine.reset();
+      }
+    });
+    const text = document.createTextNode(' ' + engine.getColorName(val));
+    wrapper.appendChild(input);
+    wrapper.appendChild(text);
+    wrapper.style.marginRight = '0.75em';
+    avpConfigEl.appendChild(wrapper);
+  });
+}

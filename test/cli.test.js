@@ -109,3 +109,11 @@ test('interactive reset command restores board', async () => {
   //assert.ok(afterReset.includes('P P P P P P P P 2'));
   assert.notEqual(afterMove, afterReset);
 });
+
+test('CLI: AVP variant with white peasants via args', async () => {
+  const { stdout } = await runCliInteractive(['board', 'exit'], ['--avp', '--avp-peasants=white']);
+  // Expect white pawns on ranks 2 and 3 and black back rank on 8
+  assert.ok(stdout.includes('P P P P P P P P 2'));
+  assert.ok(stdout.includes('P P P P P P P P 3'));
+  assert.ok(stdout.includes('r n b q k b n r 8'));
+});

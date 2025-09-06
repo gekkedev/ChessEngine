@@ -53,4 +53,27 @@ export class AristocratsVsPeasantsPlugin {
     engine.lastEvent = null;
     return true;
   }
+
+  // Standardized config API
+  getConfigSpec(engine) {
+    return {
+      peasants: {
+        type: 'enum',
+        options: ['white', 'black'],
+        default: 'black'
+      }
+    };
+  }
+
+  getConfig() {
+    return { peasants: this.peasants };
+  }
+
+  configure(engine, cfg) {
+    if (!cfg || typeof cfg !== 'object') return;
+    const val = cfg.peasants;
+    if (val === 'white' || val === 'black') {
+      this.peasants = val;
+    }
+  }
 }

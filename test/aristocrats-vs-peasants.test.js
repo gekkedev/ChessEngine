@@ -5,7 +5,10 @@ import { AristocratsVsPeasantsPlugin } from '../engine/plugins.js';
 
 test('Aristocrats vs. Peasants: black peasants, white aristocrats setup', () => {
   const e = new ChessEngine();
-  e.addPlugin(new AristocratsVsPeasantsPlugin({ peasants: 'black' }));
+  const plugin = new AristocratsVsPeasantsPlugin();
+  e.addPlugin(plugin);
+  // via engine config API with default
+  e.setPluginConfig(plugin, { peasants: 'black' });
   e.reset();
 
   // White back rank pieces on y=0, no white pawns on y=1
@@ -29,7 +32,10 @@ test('Aristocrats vs. Peasants: black peasants, white aristocrats setup', () => 
 
 test('Aristocrats vs. Peasants: white peasants, black aristocrats setup', () => {
   const e = new ChessEngine();
-  e.addPlugin(new AristocratsVsPeasantsPlugin({ peasants: 'white' }));
+  const plugin = new AristocratsVsPeasantsPlugin();
+  e.addPlugin(plugin);
+  // configure via engine to white peasants
+  e.setPluginConfig(plugin, { peasants: 'white' });
   e.reset();
 
   // Black back rank pieces on y=7, no black pawns on y=6
@@ -49,4 +55,16 @@ test('Aristocrats vs. Peasants: white peasants, black aristocrats setup', () => 
   }
   assert.equal(e.getPiece(4, 0)?.type, 'king');
   assert.equal(e.getPiece(4, 0)?.color, 'white');
+});
+test('Aristocrats vs. Peasants: plugin exposes config spec and current config', () => {
+  const e = new ChessEngine();
+  const plugin = new AristocratsVsPeasantsPlugin();
+  e.addPlugin(plugin);
+  const spec = plugin.getConfigSpec(e);
+  assert.equal(spec.peasants.type, 'enum');
+  assert.deepEqual(spec.peasants.options.sort(), ['white','black'].sort());
+  assert.equal(spec.peasants.default, 'black');
+  assert.equal(plugin.getConfig().peasants, 'black');
+  e.setPluginConfig(plugin, { peasants: 'white' });
+  assert.equal(plugin.getConfig().peasants, 'white');
 });

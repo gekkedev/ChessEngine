@@ -90,6 +90,15 @@ export class ChessEngine {
     this.plugins.push(plugin);
   }
 
+  // Configure a plugin instance with a standardized config object
+  // Plugins may implement configure(engine, config) and getConfig()/getConfigSpec()
+  setPluginConfig(plugin, config) {
+    if (this.plugins.includes(plugin) && typeof plugin.configure === 'function') {
+      plugin.configure(this, config);
+      this._emitUpdate();
+    }
+  }
+
   on(event, handler) {
     if (!this._listeners[event]) this._listeners[event] = new Set();
     this._listeners[event].add(handler);
